@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=2400, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#000000">
@@ -21,9 +21,9 @@
             font-family: system-ui, -apple-system, sans-serif;
             image-rendering: crisp-edges;
             image-rendering: -webkit-optimize-contrast;
+            -webkit-text-size-adjust: none;
         }
 
-        /* Container utama: dikunci persis 2400×1080, centered, tidak boleh keluar */
         #fixed-container {
             position: fixed;
             top: 50%;
@@ -34,16 +34,14 @@
             background: #0a1f3a;
             overflow: hidden;
             box-shadow: 0 0 60px rgba(0,0,0,0.9);
-            z-index: 1;
+            transform: scale(1);
+            image-rendering: crisp-edges;
         }
 
-        /* Semua elemen harus di dalam container ini, tidak boleh overflow */
         .screen-img {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             object-fit: contain;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
@@ -55,29 +53,28 @@
         #loadscreen-img { z-index: 3; }
         #home-img { z-index: 4; }
 
-        /* Karakter utama (bubu.gif / hero) tetap di dalam container */
         #hero-character {
             position: absolute;
             bottom: 0.5vh;
             left: 50%;
             transform: translateX(-50%);
-            width: 55vw;
-            max-width: 900px;
+            width: min(55vw, 900px);
             height: auto;
-            max-height: 80%; /* batasi agar tidak melebihi tinggi container */
+            max-height: 80vh;
             z-index: 5;
             opacity: 0;
             pointer-events: none;
             image-rendering: crisp-edges;
         }
 
-        /* UI Overlay: semua elemen diletakkan relatif container */
         .ui-overlay {
             position: absolute;
             inset: 0;
-            overflow: hidden; /* mencegah overflow */
+            overflow: hidden;
             pointer-events: none;
             z-index: 10;
+            opacity: 0;
+            transition: opacity 1.5s ease-in;
         }
 
         .top-bar {
@@ -85,79 +82,78 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 80px;
+            height: 60px; /* dikecilin */
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(5px);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 20px;
             color: white;
-            font-size: 20px;
+            font-size: 16px; /* dikecilin */
             pointer-events: auto;
         }
 
-        .top-left { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+        .top-left { display: flex; align-items: center; gap: 15px; }
         .level-badge {
             background: #ffd700;
             color: #000;
-            padding: 8px 16px;
-            border-radius: 30px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-weight: bold;
+            font-size: 14px;
         }
 
-        .stats { display: flex; gap: 30px; flex-wrap: nowrap; }
+        .stats { display: flex; gap: 20px; }
+        .stat { display: flex; align-items: center; gap: 6px; font-size: 14px; }
 
         .left-sidebar, .right-sidebar {
             position: absolute;
-            top: 100px;
+            top: 80px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 15px;
             pointer-events: auto;
-            max-height: calc(1080px - 200px); /* batasi tinggi agar tidak keluar container */
+            max-height: calc(1080px - 160px);
             overflow: hidden;
         }
 
-        .left-sidebar { left: 20px; }
-        .right-sidebar { right: 20px; }
+        .left-sidebar { left: 15px; }
+        .right-sidebar { right: 15px; }
 
         .menu-btn {
-            width: 80px;
-            height: 80px;
+            width: 60px; /* dikecilin dari 80px */
+            height: 60px;
             background: rgba(255,255,255,0.15);
-            border-radius: 20px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 28px; /* dikecilin */
             color: white;
             backdrop-filter: blur(6px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            flex-shrink: 0;
         }
 
         .bottom-bar {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 40px;
+            gap: 30px;
             pointer-events: auto;
-            max-width: 100%;
         }
 
         .btn-big {
-            padding: 18px 50px;
-            font-size: 24px;
+            padding: 14px 40px; /* dikecilin */
+            font-size: 20px;
             font-weight: bold;
             border: none;
-            border-radius: 60px;
+            border-radius: 50px;
             color: white;
             cursor: pointer;
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-            white-space: nowrap;
         }
 
         .btn-stage { background: linear-gradient(135deg, #00ff88, #00cc66); }
@@ -165,38 +161,22 @@
 
         .chat-bubble {
             position: absolute;
-            bottom: 140px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255,255,255,0.95);
             color: #000;
-            padding: 14px 30px;
-            border-radius: 40px;
-            font-size: 20px;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 16px;
             white-space: nowrap;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             pointer-events: none;
-            max-width: 80%;
+            max-width: 70%;
         }
 
-        #loading-overlay {
-            position: absolute;
-            bottom: 5vh;
-            right: 5vw;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            color: #fff;
-            font-size: 14px;
-            z-index: 20;
-        }
-
-        #pc-warning, #landscape-hint {
-            position: absolute;
-            inset: 0;
-            z-index: 30;
-            display: none;
-        }
+        #loading-overlay { position: absolute; bottom: 5vh; right: 5vw; display: none; align-items: center; gap: 12px; color: #fff; font-size: 14px; z-index: 20; }
+        #pc-warning, #landscape-hint { position: absolute; inset: 0; z-index: 30; display: none; }
     </style>
 </head>
 <body>
@@ -209,7 +189,7 @@
         
         <img id="hero-character" src="/BUDU2/assets/bubu.gif" alt="Hero">
 
-        <div class="ui-overlay">
+        <div class="ui-overlay" id="ui-game">
             <div class="top-bar">
                 <div class="top-left">
                     <div class="level-badge">Lv.24</div>
@@ -298,10 +278,11 @@
             const ls = document.getElementById('loadscreen-img');
             const hm = document.getElementById('home-img');
             const hero = document.getElementById('hero-character');
+            const uiGame = document.getElementById('ui-game');
             const overlay = document.getElementById('loading-overlay');
             const audio = document.getElementById('music');
             
-            wm.style.opacity = ls.style.opacity = hm.style.opacity = hero.style.opacity = '0';
+            wm.style.opacity = ls.style.opacity = hm.style.opacity = hero.style.opacity = uiGame.style.opacity = '0';
             
             await new Promise(r => setTimeout(r, 3000));
             wm.style.opacity = '1';
@@ -316,6 +297,11 @@
             overlay.style.display = 'none';
             hm.style.opacity = '1';
             hero.style.opacity = '1';
+            
+            // UI game muncul pelan setelah hero tampil
+            setTimeout(() => {
+                uiGame.style.opacity = '1';
+            }, 800);
             
             try { await audio.play(); } 
             catch { document.body.addEventListener('touchstart', () => audio.play(), {once: true}); }
