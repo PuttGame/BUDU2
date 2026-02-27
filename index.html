@@ -15,8 +15,8 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body { width:100%; height:100%; overflow:hidden; background:#000; touch-action:none; font-family:system-ui, -apple-system, sans-serif; }
         .full-screen { position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:1; }
-        .screen-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; opacity:0; transition:opacity 1s ease-in-out; pointer-events:none; }
-        #watermark-img { z-index:2; }
+        .screen-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; opacity:0; pointer-events:none; }
+        #watermark-img { z-index:2; transition: opacity 1s ease-in-out; }
         #loadscreen-img { z-index:3; }
         #home-img { z-index:4; }
         #loading-overlay { position:fixed; bottom:5vh; right:5vw; display:none; align-items:center; gap:12px; color:#fff; font-size:14px; font-weight:400; z-index:10; text-shadow:0 0 8px rgba(0,0,0,0.8); }
@@ -76,14 +76,12 @@
                 '/BUDU2/assets/loadscreen.png',
                 '/BUDU2/assets/home.png'
             ];
-            return Promise.all(srcs.map(src => {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = resolve;
-                    img.onerror = () => { console.error('Gagal load:', src); resolve(); }; // lanjut meski error
-                    img.src = src;
-                });
-            }));
+            return Promise.all(srcs.map(src => new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = () => { console.error('Gagal load:', src); resolve(); };
+                img.src = src;
+            })));
         }
         
         async function startSequence() {
@@ -93,22 +91,38 @@
             const overlay = document.getElementById('loading-overlay');
             const audio = document.getElementById('music');
             
+            // Semua mulai opacity 0
             wm.style.opacity = ls.style.opacity = hm.style.opacity = '0';
             
-            await new Promise(r => setTimeout(r, 3000)); // hitam 3s
-            wm.style.opacity = '1';
-            setTimeout(() => wm.style.opacity = '0', 3000);
+            // 1. Hitam 3 detik
+            await new Promise(r => setTimeout(r, 3000));
+            
+            // 2. Watermark fade in → tampil 4 detik total → fade out
+            wm.style.opacity = '1';  // fade in (1 detik)
+            setTimeout(() => {
+                wm.style.opacity = '0';  // fade out (1 detik)
+            }, 3000);  // mulai fade out setelah 3 detik → total tampil 4 detik
+            
+            // Tunggu fade out selesai + hitam 3 detik lagi
             await new Promise(r => setTimeout(r, 4000));
-            await new Promise(r => setTimeout(r, 3000)); // hitam lagi 3s
+            await new Promise(r => setTimeout(r, 3000));
+            
+            // 3. Loadscreen muncul langsung (tanpa fade)
             ls.style.opacity = '1';
             await new Promise(r => setTimeout(r, 5000));
+            
+            // 4. Tampilkan loading text + spinner
             overlay.style.display = 'flex';
-            await new Promise(r => setTimeout(r, 10000)); // loading 10s
+            await new Promise(r => setTimeout(r, 10000));
+            
+            // 5. Hilangkan loadscreen langsung (tanpa fade)
             ls.style.opacity = '0';
             overlay.style.display = 'none';
-            await new Promise(r => setTimeout(r, 800));
+            
+            // 6. Home muncul langsung (tanpa fade)
             hm.style.opacity = '1';
             
+            // 7. Mainkan musik
             try {
                 await audio.play();
             } catch {
@@ -129,7 +143,6 @@
             window.addEventListener('resize', checkOrientation);
             window.addEventListener('orientationchange', checkOrientation);
             
-            // Cegah mini-infobar Chrome otomatis (biar UI clean)
             window.addEventListener('beforeinstallprompt', e => {
                 e.preventDefault();
                 console.log('PWA installable via Chrome menu ⋮ > Install app');
