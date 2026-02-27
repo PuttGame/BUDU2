@@ -32,7 +32,7 @@
             max-width: 2400px;
             max-height: 1080px;
             aspect-ratio: 2400 / 1080;
-            background: #000;
+            background: #0a1f3a; /* biru gelap seperti game */
             overflow: hidden;
             box-shadow: 0 0 40px rgba(0,0,0,0.7);
         }
@@ -47,20 +47,20 @@
             image-rendering: pixelated;
             opacity: 0;
             pointer-events: none;
-            will-change: opacity;
         }
 
         #watermark-img { z-index: 2; transition: opacity 1s ease-in-out; }
         #loadscreen-img { z-index: 3; }
         #home-img { z-index: 4; }
 
-        #bubu-gif {
+        /* Karakter utama (hero/pet) */
+        #hero-character {
             position: absolute;
-            bottom: 0.5vh;               /* ← diturunin lagi, hampir nempel bawah */
+            bottom: 0.5vh;
             left: 50%;
             transform: translateX(-50%);
-            width: 45vw;
-            max-width: 600px;
+            width: 55vw;
+            max-width: 900px;
             height: auto;
             z-index: 5;
             opacity: 0;
@@ -68,56 +68,110 @@
             image-rendering: crisp-edges;
         }
 
-        #loading-overlay {
-            position: absolute;
-            bottom: 5vh;
-            right: 5vw;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 400;
-            z-index: 10;
-            text-shadow: 0 0 8px rgba(0,0,0,0.8);
-        }
-        .spinner {
-            width: 22px;
-            height: 22px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #pc-warning {
+        /* UI Overlay */
+        .ui-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.95);
-            color: white;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            z-index: 9999;
-            font-size: 18px;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        #landscape-hint {
+        .top-bar {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 16px;
-            display: none;
-            z-index: 100;
-            text-align: center;
+            font-size: 20px;
+            pointer-events: auto;
         }
+
+        .top-left { display: flex; align-items: center; gap: 20px; }
+        .level-badge {
+            background: #ffd700;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .stats { display: flex; gap: 30px; }
+        .stat { display: flex; align-items: center; gap: 8px; }
+
+        .left-sidebar, .right-sidebar {
+            position: absolute;
+            top: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            pointer-events: auto;
+        }
+
+        .left-sidebar { left: 20px; }
+        .right-sidebar { right: 20px; }
+
+        .menu-btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .bottom-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            pointer-events: auto;
+        }
+
+        .btn-big {
+            padding: 18px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn-stage { background: linear-gradient(135deg, #00ff88, #00cc66); }
+        .btn-fight  { background: linear-gradient(135deg, #ff3366, #cc0033); }
+
+        .chat-bubble {
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.95);
+            color: #000;
+            padding: 14px 30px;
+            border-radius: 40px;
+            font-size: 20px;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        #loading-overlay { position: absolute; bottom: 5vh; right: 5vw; display: none; align-items: center; gap: 12px; color: #fff; font-size: 14px; z-index: 20; }
+        #pc-warning, #landscape-hint { position: absolute; inset: 0; z-index: 30; display: none; }
     </style>
 </head>
 <body>
@@ -128,7 +182,49 @@
             <img id="home-img" class="screen-img" src="/BUDU2/assets/home.png" alt="Home">
         </div>
         
-        <img id="bubu-gif" src="/BUDU2/assets/bubu.gif" alt="Bubu">
+        <!-- Karakter utama -->
+        <img id="hero-character" src="/BUDU2/assets/bubu.gif" alt="Hero">
+
+        <!-- UI Overlay -->
+        <div class="ui-overlay">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-left">
+                    <div class="level-badge">Lv.24</div>
+                    <div class="stats">
+                        <div class="stat">⚡ 24/50</div>
+                        <div class="stat">🪙 4,000</div>
+                        <div class="stat">💎 2,000</div>
+                    </div>
+                </div>
+                <div>⚙️</div>
+            </div>
+
+            <!-- Left Sidebar -->
+            <div class="left-sidebar">
+                <div class="menu-btn">🐱</div>
+                <div class="menu-btn">🛒</div>
+                <div class="menu-btn">🎒</div>
+                <div class="menu-btn">🏅</div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="right-sidebar">
+                <div class="menu-btn">🏆</div>
+                <div class="menu-btn">📥</div>
+                <div class="menu-btn">📜</div>
+                <div class="menu-btn">🎁</div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="bottom-bar">
+                <button class="btn-big btn-stage">STAGE</button>
+                <button class="btn-big btn-fight">FIGHT</button>
+            </div>
+
+            <!-- Chat Bubble -->
+            <div class="chat-bubble">Let's play together.. 🐊</div>
+        </div>
 
         <div id="loading-overlay">
             <div class="spinner"></div>
@@ -138,7 +234,7 @@
         <div id="pc-warning">
             <div>
                 <h2>⚠️ Hanya untuk ponsel</h2>
-                <p>Buka di Android landscape 2400×1080.<br>Install via menu Chrome ⋮ → Install app untuk pengalaman terbaik.</p>
+                <p>Buka di Android landscape 2400×1080.<br>Install via menu Chrome ⋮ → Install app.</p>
             </div>
         </div>
         
@@ -183,11 +279,11 @@
             const wm = document.getElementById('watermark-img');
             const ls = document.getElementById('loadscreen-img');
             const hm = document.getElementById('home-img');
-            const bubu = document.getElementById('bubu-gif');
+            const hero = document.getElementById('hero-character');
             const overlay = document.getElementById('loading-overlay');
             const audio = document.getElementById('music');
             
-            wm.style.opacity = ls.style.opacity = hm.style.opacity = bubu.style.opacity = '0';
+            wm.style.opacity = ls.style.opacity = hm.style.opacity = hero.style.opacity = '0';
             
             await new Promise(r => setTimeout(r, 3000));
             wm.style.opacity = '1';
@@ -201,7 +297,7 @@
             ls.style.opacity = '0';
             overlay.style.display = 'none';
             hm.style.opacity = '1';
-            bubu.style.opacity = '1';
+            hero.style.opacity = '1';
             
             try { await audio.play(); } 
             catch { document.body.addEventListener('touchstart', () => audio.play(), {once: true}); }
@@ -236,4 +332,4 @@
         };
     </script>
 </body>
-</html>
+    </html>
