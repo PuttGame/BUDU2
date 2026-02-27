@@ -19,11 +19,10 @@
             background: #000;
             touch-action: none;
             font-family: system-ui, -apple-system, sans-serif;
-            image-rendering: crisp-edges;          /* bantu tajamkan pixel art */
+            image-rendering: crisp-edges;
             image-rendering: -webkit-optimize-contrast;
         }
 
-        /* Container utama: fixed aspect ratio 2400:1080 */
         #fixed-container {
             position: fixed;
             inset: 0;
@@ -38,28 +37,26 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.7);
         }
 
-        /* Gambar full-screen di dalam container */
         .screen-img {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;                   /* tetap contain biar tidak terpotong */
-            image-rendering: crisp-edges;          /* paling penting: bikin tajam */
-            image-rendering: pixelated;            /* kalau gambar pixel art, pakai ini */
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
             opacity: 0;
             pointer-events: none;
-            will-change: opacity;                  /* optimasi performa */
+            will-change: opacity;
         }
 
         #watermark-img { z-index: 2; transition: opacity 1s ease-in-out; }
         #loadscreen-img { z-index: 3; }
         #home-img { z-index: 4; }
 
-        /* GIF bubu */
         #bubu-gif {
             position: absolute;
-            bottom: 2vh;
+            bottom: 0.5vh;               /* ← diturunin lagi, hampir nempel bawah */
             left: 50%;
             transform: translateX(-50%);
             width: 45vw;
@@ -71,7 +68,6 @@
             image-rendering: crisp-edges;
         }
 
-        /* Loading overlay */
         #loading-overlay {
             position: absolute;
             bottom: 5vh;
@@ -95,7 +91,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Warning & hint */
         #pc-warning {
             position: absolute;
             inset: 0;
@@ -122,15 +117,6 @@
             display: none;
             z-index: 100;
             text-align: center;
-        }
-
-        /* Media query untuk layar sangat kecil (ponsel portrait atau layar kecil) */
-        @media (max-aspect-ratio: 2400/1080) {
-            #fixed-container {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 2400 / 1080;
-            }
         }
     </style>
 </head>
