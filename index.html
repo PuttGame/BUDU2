@@ -19,38 +19,44 @@
             background: #000;
             touch-action: none;
             font-family: system-ui, -apple-system, sans-serif;
+            image-rendering: crisp-edges;          /* bantu tajamkan pixel art */
+            image-rendering: -webkit-optimize-contrast;
         }
 
-        /* Container utama dipaksa ukuran 2400×1080, centered */
+        /* Container utama: fixed aspect ratio 2400:1080 */
         #fixed-container {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 2400px;
-            height: 1080px;
-            transform: translate(-50%, -50%);
+            inset: 0;
+            margin: auto;
+            width: 100%;
+            height: 100%;
+            max-width: 2400px;
+            max-height: 1080px;
+            aspect-ratio: 2400 / 1080;
             background: #000;
             overflow: hidden;
-            box-shadow: 0 0 60px rgba(0,0,0,0.8);
-            z-index: 1;
+            box-shadow: 0 0 40px rgba(0,0,0,0.7);
         }
 
         /* Gambar full-screen di dalam container */
         .screen-img {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: contain;                   /* tetap contain biar tidak terpotong */
+            image-rendering: crisp-edges;          /* paling penting: bikin tajam */
+            image-rendering: pixelated;            /* kalau gambar pixel art, pakai ini */
             opacity: 0;
             pointer-events: none;
+            will-change: opacity;                  /* optimasi performa */
         }
+
         #watermark-img { z-index: 2; transition: opacity 1s ease-in-out; }
         #loadscreen-img { z-index: 3; }
         #home-img { z-index: 4; }
 
-        /* GIF bubu di tengah bawah (relatif container) */
+        /* GIF bubu */
         #bubu-gif {
             position: absolute;
             bottom: 2vh;
@@ -62,9 +68,10 @@
             z-index: 5;
             opacity: 0;
             pointer-events: none;
+            image-rendering: crisp-edges;
         }
 
-        /* Loading overlay di kanan bawah container */
+        /* Loading overlay */
         #loading-overlay {
             position: absolute;
             bottom: 5vh;
@@ -88,11 +95,10 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Warning PC full container */
+        /* Warning & hint */
         #pc-warning {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            inset: 0;
             background: rgba(0,0,0,0.95);
             color: white;
             display: none;
@@ -104,7 +110,6 @@
             font-size: 18px;
         }
 
-        /* Hint landscape di tengah container */
         #landscape-hint {
             position: absolute;
             top: 50%; left: 50%;
@@ -118,10 +123,18 @@
             z-index: 100;
             text-align: center;
         }
+
+        /* Media query untuk layar sangat kecil (ponsel portrait atau layar kecil) */
+        @media (max-aspect-ratio: 2400/1080) {
+            #fixed-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 2400 / 1080;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Container ukuran tetap 2400×1080 -->
     <div id="fixed-container">
         <div id="app">
             <img id="watermark-img" class="screen-img" src="/BUDU2/assets/watermark.png" alt="Watermark">
@@ -161,12 +174,8 @@
         }
         
         async function forceFullscreenAndLandscape() {
-            try {
-                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
-            } catch (e) {}
-            try {
-                if (screen.orientation?.lock) await screen.orientation.lock('landscape-primary');
-            } catch (e) {}
+            try { await document.documentElement.requestFullscreen(); } catch (e) {}
+            try { await screen.orientation?.lock('landscape-primary'); } catch (e) {}
         }
         
         function preloadImages() {
@@ -208,11 +217,8 @@
             hm.style.opacity = '1';
             bubu.style.opacity = '1';
             
-            try {
-                await audio.play();
-            } catch {
-                document.body.addEventListener('touchstart', () => audio.play(), {once: true});
-            }
+            try { await audio.play(); } 
+            catch { document.body.addEventListener('touchstart', () => audio.play(), {once: true}); }
             
             forceFullscreenAndLandscape();
         }
@@ -230,7 +236,7 @@
             
             window.addEventListener('beforeinstallprompt', e => {
                 e.preventDefault();
-                console.log('PWA installable via Chrome menu ⋮ > Install app');
+                console.log('PWA installable via Chrome menu');
             });
             
             startSequence();
@@ -238,7 +244,7 @@
             
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/BUDU2/sw.js', {scope: '/BUDU2/'})
-                    .then(reg => console.log('SW OK, scope:', reg.scope))
+                    .then(reg => console.log('SW registered'))
                     .catch(err => console.error('SW error:', err));
             }
         };
