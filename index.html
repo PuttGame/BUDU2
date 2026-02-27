@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#000000">
     <title>BUDU2</title>
     
-    <!-- PWA Manifest -->
+    <!-- Manifest dengan path absolut -->
     <link rel="manifest" href="/BUDU2/manifest.json">
     
     <style>
@@ -40,13 +40,13 @@
     
     <div id="pc-warning">
         <div>
-            <h2>⚠️ Website ini hanya untuk ponsel</h2>
-            <p>Buka di ponsel Android landscape 2400×1080.<br>Install via menu Chrome (⋮) → Install app untuk pengalaman terbaik.</p>
+            <h2>⚠️ Hanya untuk ponsel</h2>
+            <p>Buka di Android landscape 2400×1080.<br>Install via menu Chrome ⋮ → Install app untuk fullscreen optimal.</p>
         </div>
     </div>
     
     <div id="landscape-hint">
-        Putar ponsel Anda ke mode landscape
+        Putar ponsel ke mode landscape
     </div>
     
     <audio id="music" src="/BUDU2/assets/music1.mp3" preload="auto" loop></audio>
@@ -57,68 +57,62 @@
         }
         
         function checkOrientation() {
-            const hint = document.getElementById('landscape-hint');
-            if (window.innerWidth < window.innerHeight) {
-                hint.style.display = 'block';
-            } else {
-                hint.style.display = 'none';
-            }
+            document.getElementById('landscape-hint').style.display = 
+                (window.innerWidth < window.innerHeight) ? 'block' : 'none';
         }
         
         async function forceFullscreenAndLandscape() {
-            if (document.documentElement.requestFullscreen) {
-                try { await document.documentElement.requestFullscreen(); } catch (e) {}
-            }
-            if (screen.orientation && screen.orientation.lock) {
-                try { await screen.orientation.lock('landscape-primary'); } catch (e) {}
-            }
+            try {
+                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+            } catch (e) {}
+            try {
+                if (screen.orientation?.lock) await screen.orientation.lock('landscape-primary');
+            } catch (e) {}
         }
         
         function preloadImages() {
-            const images = [
+            const srcs = [
                 '/BUDU2/assets/watermark.png',
                 '/BUDU2/assets/loadscreen.png',
                 '/BUDU2/assets/home.png'
             ];
-            return Promise.all(images.map(src => new Promise(resolve => {
-                const img = new Image();
-                img.onload = resolve;
-                img.onerror = () => console.error('Gagal load gambar:', src);
-                img.src = src;
-            })));
+            return Promise.all(srcs.map(src => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = resolve;
+                    img.onerror = () => { console.error('Gagal load:', src); resolve(); }; // lanjut meski error
+                    img.src = src;
+                });
+            }));
         }
         
         async function startSequence() {
-            const watermark = document.getElementById('watermark-img');
-            const loadscreen = document.getElementById('loadscreen-img');
-            const home = document.getElementById('home-img');
-            const loadingOverlay = document.getElementById('loading-overlay');
+            const wm = document.getElementById('watermark-img');
+            const ls = document.getElementById('loadscreen-img');
+            const hm = document.getElementById('home-img');
+            const overlay = document.getElementById('loading-overlay');
             const audio = document.getElementById('music');
             
-            watermark.style.opacity = '0';
-            loadscreen.style.opacity = '0';
-            home.style.opacity = '0';
+            wm.style.opacity = ls.style.opacity = hm.style.opacity = '0';
             
-            await new Promise(r => setTimeout(r, 3000));
-            watermark.style.opacity = '1';
-            setTimeout(() => { watermark.style.opacity = '0'; }, 3000);
+            await new Promise(r => setTimeout(r, 3000)); // hitam 3s
+            wm.style.opacity = '1';
+            setTimeout(() => wm.style.opacity = '0', 3000);
             await new Promise(r => setTimeout(r, 4000));
-            await new Promise(r => setTimeout(r, 3000));
-            loadscreen.style.opacity = '1';
+            await new Promise(r => setTimeout(r, 3000)); // hitam lagi 3s
+            ls.style.opacity = '1';
             await new Promise(r => setTimeout(r, 5000));
-            loadingOverlay.style.display = 'flex';
-            await new Promise(r => setTimeout(r, 10000));
-            loadscreen.style.opacity = '0';
-            loadingOverlay.style.display = 'none';
+            overlay.style.display = 'flex';
+            await new Promise(r => setTimeout(r, 10000)); // loading 10s
+            ls.style.opacity = '0';
+            overlay.style.display = 'none';
             await new Promise(r => setTimeout(r, 800));
-            home.style.opacity = '1';
+            hm.style.opacity = '1';
             
             try {
                 await audio.play();
-                console.log('Musik diputar');
-            } catch (err) {
-                console.log('Autoplay diblokir, tunggu touch');
-                document.body.addEventListener('touchstart', () => audio.play().catch(() => {}), { once: true });
+            } catch {
+                document.body.addEventListener('touchstart', () => audio.play(), {once: true});
             }
             
             forceFullscreenAndLandscape();
@@ -131,32 +125,23 @@
             }
             
             await preloadImages();
-            
             checkOrientation();
             window.addEventListener('resize', checkOrientation);
             window.addEventListener('orientationchange', checkOrientation);
             
-            // Cegah mini-infobar otomatis agar tidak ganggu UI
-            window.addEventListener('beforeinstallprompt', (e) => {
+            // Cegah mini-infobar Chrome otomatis (biar UI clean)
+            window.addEventListener('beforeinstallprompt', e => {
                 e.preventDefault();
-                console.log('PWA siap installable – cek menu Chrome ⋮ untuk "Install app"');
+                console.log('PWA installable via Chrome menu ⋮ > Install app');
             });
             
             startSequence();
+            setTimeout(forceFullscreenAndLandscape, 1500);
             
-            setTimeout(forceFullscreenAndLandscape, 1000);
-            
-            // Register Service Worker dengan scope eksplisit
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/BUDU2/sw.js', { scope: '/BUDU2/' })
-                    .then(reg => {
-                        console.log('Service Worker terdaftar sukses, scope:', reg.scope);
-                    })
-                    .catch(err => {
-                        console.error('Gagal register SW:', err);
-                    });
-            } else {
-                console.warn('Service Worker tidak didukung di browser ini');
+                navigator.serviceWorker.register('/BUDU2/sw.js', {scope: '/BUDU2/'})
+                    .then(reg => console.log('SW OK, scope:', reg.scope))
+                    .catch(err => console.error('SW error:', err));
             }
         };
     </script>
