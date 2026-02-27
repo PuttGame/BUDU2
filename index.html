@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#000000">
+    <title>BUDU2</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icon untuk PWA (silakan ganti dengan icon Anda) -->
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            touch-action: none;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        .full-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1;
+        }
+        
+        .screen-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* menjaga proporsi gambar 2400×1080 */
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+        }
+        
+        #watermark-img { z-index: 2; }
+        #loadscreen-img { z-index: 3; }
+        #home-img { z-index: 4; }
+        
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            bottom: 5vh;
+            right: 5vw;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 400;
+            z-index: 10;
+            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+        }
+        
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Pesan untuk PC */
+        #pc-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 9999;
+            font-size: 18px;
+        }
+        
+        /* Force landscape hint (jika belum landscape) */
+        #landscape-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+            z-index: 100;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="full-screen" id="app">
+        <!-- Gambar-gambar -->
+        <img id="watermark-img" class="screen-img" src="assets/watermark.png" alt="Watermark">
+        <img id="loadscreen-img" class="screen-img" src="assets/loadscreen.png" alt="Loadscreen">
+        <img id="home-img" class="screen-img" src="assets/home.png" alt="Home">
+    </div>
+    
+    <!-- Loading indicator -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <span>loading</span>
+    </div>
+    
+    <!-- Warning untuk PC -->
+    <div id="pc-warning">
+        <div>
+            <h2>⚠️ Website ini hanya untuk ponsel</h2>
+            <p>Mohon buka di ponsel Android/iOS dengan resolusi landscape 2400×1080.<br>
+            Install sebagai aplikasi PWA untuk pengalaman terbaik.</p>
+        </div>
+    </div>
+    
+    <!-- Hint landscape -->
+    <div id="landscape-hint">
+        Putar ponsel Anda ke mode landscape
+    </div>
+    
+    <!-- Audio -->
+    <audio id="music" src="assets/music1.mp3" preload="auto"></audio>
+
+    <script>
+        // ================== DETEKSI PONSEL & LANDSCAPE ==================
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        function checkOrientation() {
+            const hint = document.getElementById('landscape-hint');
+            if (window.innerWidth < window.innerHeight) {
+                hint.style.display = 'block';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+        
+        // ================== FORCE FULLSCREEN & LANDSCAPE ==================
+        async function forceFullscreenAndLandscape() {
+            // Fullscreen
+            if (document.documentElement.requestFullscreen) {
+                try {
+                    await document.documentElement.requestFullscreen();
+                } catch (e) {}
+            }
+            
+            // Lock orientation (hanya berhasil di PWA / setelah user gesture)
+            if (screen.orientation && screen.orientation.lock) {
+                try {
+                    await screen.orientation.lock('landscape-primary');
+                } catch (e) {}
+            }
+        }
+        
+        // ================== PRELOAD GAMBAR ==================
+        function preloadImages() {
+            const images = ['assets/watermark.png', 'assets/loadscreen.png', 'assets/home.png'];
+            return Promise.all(images.map(src => {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = resolve;
+                    img.src = src;
+                });
+            }));
+        }
+        
+        // ================== MAIN SEQUENCE ==================
+        async function startSequence() {
+            const watermark = document.getElementById('watermark-img');
+            const loadscreen = document.getElementById('loadscreen-img');
+            const home = document.getElementById('home-img');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const audio = document.getElementById('music');
+            audio.loop = true;
+            
+            // Semua gambar mulai transparan
+            watermark.style.opacity = '0';
+            loadscreen.style.opacity = '0';
+            home.style.opacity = '0';
+            
+            // 1. Layar hitam 3 detik
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // 2. Tampilkan watermark.png selama 4 detik dengan fade in & fade out
+            watermark.style.transition = 'opacity 1s ease-in-out';
+            watermark.style.opacity = '1'; // fade in
+            
+            // Fade out mulai di detik ke-3 (total tampil 4 detik)
+            setTimeout(() => {
+                watermark.style.opacity = '0';
+            }, 3000);
+            
+            // Tunggu fade out selesai + layar hitam 3 detik
+            await new Promise(resolve => setTimeout(resolve, 4000));
+            
+            // 3. Layar hitam 3 detik
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // 4. Tampilkan loadscreen.png
+            loadscreen.style.transition = 'opacity 0.8s ease-in-out';
+            loadscreen.style.opacity = '1';
+            
+            // 5. Setelah loadscreen muncul 5 detik → tampilkan teks & animasi loading
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            loadingOverlay.style.display = 'flex';
+            
+            // 6. Loading berjalan 10 detik
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            
+            // 7. Selesai loading → tampilkan home.png
+            loadscreen.style.opacity = '0';
+            loadingOverlay.style.display = 'none';
+            
+            await new Promise(resolve => setTimeout(resolve, 800)); // tunggu fade out loadscreen
+            
+            home.style.transition = 'opacity 1s ease-in-out';
+            home.style.opacity = '1';
+            
+            // 8. Mainkan musik
+            try {
+                await audio.play();
+            } catch (err) {
+                // Autoplay diblokir browser → user cukup tap layar sekali
+                console.log('%cMusik siap. Ketuk layar untuk memutar musik.', 'color: #fff; font-size: 12px');
+                document.body.addEventListener('touchstart', () => {
+                    audio.play().catch(() => {});
+                }, { once: true });
+            }
+            
+            // Force fullscreen sekali lagi setelah home muncul
+            forceFullscreenAndLandscape();
+        }
+        
+        // ================== INIT ==================
+        window.onload = async function() {
+            // Cek apakah di ponsel
+            if (!isMobileDevice()) {
+                document.getElementById('pc-warning').style.display = 'flex';
+                return;
+            }
+            
+            // Preload semua gambar
+            await preloadImages();
+            
+            // Cek orientasi
+            checkOrientation();
+            window.addEventListener('resize', checkOrientation);
+            window.addEventListener('orientationchange', checkOrientation);
+            
+            // Mulai sequence
+            startSequence();
+            
+            // Force fullscreen & landscape (PWA lebih optimal)
+            setTimeout(() => {
+                forceFullscreenAndLandscape();
+            }, 1000);
+            
+            // Register Service Worker untuk PWA
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('sw.js');
+                    console.log('%cPWA Service Worker terdaftar ✓', 'color: lime');
+                } catch (err) {
+                    console.log('Service Worker gagal:', err);
+                }
+            }
+            
+            // Install prompt (Chrome akan otomatis tampilkan banner install)
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                console.log('%cPWA siap di-install. Chrome akan menampilkan banner install.', 'color: #0ff');
+            });
+        };
+    </script>
+</body>
+</html>
