@@ -23,23 +23,25 @@
             image-rendering: -webkit-optimize-contrast;
         }
 
+        /* Container utama: dikunci persis 2400×1080, centered, tidak boleh keluar */
         #fixed-container {
             position: fixed;
-            inset: 0;
-            margin: auto;
-            width: 100%;
-            height: 100%;
-            max-width: 2400px;
-            max-height: 1080px;
-            aspect-ratio: 2400 / 1080;
-            background: #0a1f3a; /* biru gelap seperti game */
+            top: 50%;
+            left: 50%;
+            width: 2400px;
+            height: 1080px;
+            transform: translate(-50%, -50%);
+            background: #0a1f3a;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,0,0,0.7);
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            z-index: 1;
         }
 
+        /* Semua elemen harus di dalam container ini, tidak boleh overflow */
         .screen-img {
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -53,7 +55,7 @@
         #loadscreen-img { z-index: 3; }
         #home-img { z-index: 4; }
 
-        /* Karakter utama (hero/pet) */
+        /* Karakter utama (bubu.gif / hero) tetap di dalam container */
         #hero-character {
             position: absolute;
             bottom: 0.5vh;
@@ -62,16 +64,18 @@
             width: 55vw;
             max-width: 900px;
             height: auto;
+            max-height: 80%; /* batasi agar tidak melebihi tinggi container */
             z-index: 5;
             opacity: 0;
             pointer-events: none;
             image-rendering: crisp-edges;
         }
 
-        /* UI Overlay */
+        /* UI Overlay: semua elemen diletakkan relatif container */
         .ui-overlay {
             position: absolute;
             inset: 0;
+            overflow: hidden; /* mencegah overflow */
             pointer-events: none;
             z-index: 10;
         }
@@ -93,7 +97,7 @@
             pointer-events: auto;
         }
 
-        .top-left { display: flex; align-items: center; gap: 20px; }
+        .top-left { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
         .level-badge {
             background: #ffd700;
             color: #000;
@@ -102,8 +106,7 @@
             font-weight: bold;
         }
 
-        .stats { display: flex; gap: 30px; }
-        .stat { display: flex; align-items: center; gap: 8px; }
+        .stats { display: flex; gap: 30px; flex-wrap: nowrap; }
 
         .left-sidebar, .right-sidebar {
             position: absolute;
@@ -112,6 +115,8 @@
             flex-direction: column;
             gap: 25px;
             pointer-events: auto;
+            max-height: calc(1080px - 200px); /* batasi tinggi agar tidak keluar container */
+            overflow: hidden;
         }
 
         .left-sidebar { left: 20px; }
@@ -129,6 +134,7 @@
             color: white;
             backdrop-filter: blur(6px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0;
         }
 
         .bottom-bar {
@@ -139,6 +145,7 @@
             display: flex;
             gap: 40px;
             pointer-events: auto;
+            max-width: 100%;
         }
 
         .btn-big {
@@ -150,6 +157,7 @@
             color: white;
             cursor: pointer;
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            white-space: nowrap;
         }
 
         .btn-stage { background: linear-gradient(135deg, #00ff88, #00cc66); }
@@ -168,10 +176,27 @@
             white-space: nowrap;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             pointer-events: none;
+            max-width: 80%;
         }
 
-        #loading-overlay { position: absolute; bottom: 5vh; right: 5vw; display: none; align-items: center; gap: 12px; color: #fff; font-size: 14px; z-index: 20; }
-        #pc-warning, #landscape-hint { position: absolute; inset: 0; z-index: 30; display: none; }
+        #loading-overlay {
+            position: absolute;
+            bottom: 5vh;
+            right: 5vw;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 20;
+        }
+
+        #pc-warning, #landscape-hint {
+            position: absolute;
+            inset: 0;
+            z-index: 30;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -182,12 +207,9 @@
             <img id="home-img" class="screen-img" src="/BUDU2/assets/home.png" alt="Home">
         </div>
         
-        <!-- Karakter utama -->
         <img id="hero-character" src="/BUDU2/assets/bubu.gif" alt="Hero">
 
-        <!-- UI Overlay -->
         <div class="ui-overlay">
-            <!-- Top Bar -->
             <div class="top-bar">
                 <div class="top-left">
                     <div class="level-badge">Lv.24</div>
@@ -200,7 +222,6 @@
                 <div>⚙️</div>
             </div>
 
-            <!-- Left Sidebar -->
             <div class="left-sidebar">
                 <div class="menu-btn">🐱</div>
                 <div class="menu-btn">🛒</div>
@@ -208,7 +229,6 @@
                 <div class="menu-btn">🏅</div>
             </div>
 
-            <!-- Right Sidebar -->
             <div class="right-sidebar">
                 <div class="menu-btn">🏆</div>
                 <div class="menu-btn">📥</div>
@@ -216,13 +236,11 @@
                 <div class="menu-btn">🎁</div>
             </div>
 
-            <!-- Bottom Bar -->
             <div class="bottom-bar">
                 <button class="btn-big btn-stage">STAGE</button>
                 <button class="btn-big btn-fight">FIGHT</button>
             </div>
 
-            <!-- Chat Bubble -->
             <div class="chat-bubble">Let's play together.. 🐊</div>
         </div>
 
@@ -332,4 +350,4 @@
         };
     </script>
 </body>
-    </html>
+</html>
