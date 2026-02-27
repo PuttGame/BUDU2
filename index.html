@@ -11,9 +11,6 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     
-    <!-- Icon untuk PWA (silakan ganti dengan icon Anda) -->
-    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
-    
     <style>
         * {
             margin: 0;
@@ -46,7 +43,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* menjaga proporsi gambar 2400×1080 */
+            object-fit: contain;
             opacity: 0;
             transition: opacity 1s ease-in-out;
             pointer-events: none;
@@ -56,7 +53,6 @@
         #loadscreen-img { z-index: 3; }
         #home-img { z-index: 4; }
         
-        /* Loading Overlay */
         #loading-overlay {
             position: fixed;
             bottom: 5vh;
@@ -84,7 +80,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Pesan untuk PC */
         #pc-warning {
             position: fixed;
             top: 0;
@@ -102,7 +97,6 @@
             font-size: 18px;
         }
         
-        /* Force landscape hint (jika belum landscape) */
         #landscape-hint {
             position: fixed;
             top: 50%;
@@ -117,23 +111,48 @@
             z-index: 100;
             text-align: center;
         }
+
+        /* Tombol Install */
+        #install-btn-container {
+            display: none;
+            position: fixed;
+            bottom: 8vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+        }
+        
+        #install-btn {
+            padding: 14px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff3366, #ff6b6b);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 20px rgba(255,51,102,0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #install-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(255,51,102,0.3);
+        }
     </style>
 </head>
 <body>
     <div class="full-screen" id="app">
-        <!-- Gambar-gambar -->
         <img id="watermark-img" class="screen-img" src="assets/watermark.png" alt="Watermark">
         <img id="loadscreen-img" class="screen-img" src="assets/loadscreen.png" alt="Loadscreen">
         <img id="home-img" class="screen-img" src="assets/home.png" alt="Home">
     </div>
     
-    <!-- Loading indicator -->
     <div id="loading-overlay">
         <div class="spinner"></div>
         <span>loading</span>
     </div>
     
-    <!-- Warning untuk PC -->
     <div id="pc-warning">
         <div>
             <h2>⚠️ Website ini hanya untuk ponsel</h2>
@@ -142,16 +161,20 @@
         </div>
     </div>
     
-    <!-- Hint landscape -->
     <div id="landscape-hint">
         Putar ponsel Anda ke mode landscape
     </div>
     
-    <!-- Audio -->
-    <audio id="music" src="assets/music1.mp3" preload="auto"></audio>
+    <!-- Tombol Install -->
+    <div id="install-btn-container">
+        <button id="install-btn">Install ke Layar Utama</button>
+    </div>
+    
+    <audio id="music" src="assets/music1.mp3" preload="auto" loop></audio>
 
     <script>
-        // ================== DETEKSI PONSEL & LANDSCAPE ==================
+        let deferredPrompt = null;
+
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
@@ -165,24 +188,15 @@
             }
         }
         
-        // ================== FORCE FULLSCREEN & LANDSCAPE ==================
         async function forceFullscreenAndLandscape() {
-            // Fullscreen
             if (document.documentElement.requestFullscreen) {
-                try {
-                    await document.documentElement.requestFullscreen();
-                } catch (e) {}
+                try { await document.documentElement.requestFullscreen(); } catch (e) {}
             }
-            
-            // Lock orientation (hanya berhasil di PWA / setelah user gesture)
             if (screen.orientation && screen.orientation.lock) {
-                try {
-                    await screen.orientation.lock('landscape-primary');
-                } catch (e) {}
+                try { await screen.orientation.lock('landscape-primary'); } catch (e) {}
             }
         }
         
-        // ================== PRELOAD GAMBAR ==================
         function preloadImages() {
             const images = ['assets/watermark.png', 'assets/loadscreen.png', 'assets/home.png'];
             return Promise.all(images.map(src => {
@@ -194,114 +208,95 @@
             }));
         }
         
-        // ================== MAIN SEQUENCE ==================
         async function startSequence() {
             const watermark = document.getElementById('watermark-img');
             const loadscreen = document.getElementById('loadscreen-img');
             const home = document.getElementById('home-img');
             const loadingOverlay = document.getElementById('loading-overlay');
             const audio = document.getElementById('music');
-            audio.loop = true;
             
-            // Semua gambar mulai transparan
             watermark.style.opacity = '0';
             loadscreen.style.opacity = '0';
             home.style.opacity = '0';
             
-            // 1. Layar hitam 3 detik
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise(r => setTimeout(r, 3000));
             
-            // 2. Tampilkan watermark.png selama 4 detik dengan fade in & fade out
-            watermark.style.transition = 'opacity 1s ease-in-out';
-            watermark.style.opacity = '1'; // fade in
+            watermark.style.opacity = '1';
+            setTimeout(() => { watermark.style.opacity = '0'; }, 3000);
+            await new Promise(r => setTimeout(r, 4000));
             
-            // Fade out mulai di detik ke-3 (total tampil 4 detik)
-            setTimeout(() => {
-                watermark.style.opacity = '0';
-            }, 3000);
+            await new Promise(r => setTimeout(r, 3000));
             
-            // Tunggu fade out selesai + layar hitam 3 detik
-            await new Promise(resolve => setTimeout(resolve, 4000));
-            
-            // 3. Layar hitam 3 detik
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            
-            // 4. Tampilkan loadscreen.png
-            loadscreen.style.transition = 'opacity 0.8s ease-in-out';
             loadscreen.style.opacity = '1';
+            await new Promise(r => setTimeout(r, 5000));
             
-            // 5. Setelah loadscreen muncul 5 detik → tampilkan teks & animasi loading
-            await new Promise(resolve => setTimeout(resolve, 5000));
             loadingOverlay.style.display = 'flex';
+            await new Promise(r => setTimeout(r, 10000));
             
-            // 6. Loading berjalan 10 detik
-            await new Promise(resolve => setTimeout(resolve, 10000));
-            
-            // 7. Selesai loading → tampilkan home.png
             loadscreen.style.opacity = '0';
             loadingOverlay.style.display = 'none';
+            await new Promise(r => setTimeout(r, 800));
             
-            await new Promise(resolve => setTimeout(resolve, 800)); // tunggu fade out loadscreen
-            
-            home.style.transition = 'opacity 1s ease-in-out';
             home.style.opacity = '1';
             
-            // 8. Mainkan musik
             try {
                 await audio.play();
             } catch (err) {
-                // Autoplay diblokir browser → user cukup tap layar sekali
-                console.log('%cMusik siap. Ketuk layar untuk memutar musik.', 'color: #fff; font-size: 12px');
-                document.body.addEventListener('touchstart', () => {
-                    audio.play().catch(() => {});
-                }, { once: true });
+                document.body.addEventListener('touchstart', () => audio.play().catch(() => {}), { once: true });
             }
             
-            // Force fullscreen sekali lagi setelah home muncul
+            // Tampilkan tombol install setelah home muncul
+            await new Promise(r => setTimeout(r, 1500));
+            document.getElementById('install-btn-container').style.display = 'block';
+            
             forceFullscreenAndLandscape();
         }
         
-        // ================== INIT ==================
-        window.onload = async function() {
-            // Cek apakah di ponsel
+        async function installPWA() {
+            if (!deferredPrompt) {
+                alert("Install prompt belum siap. Coba dari menu Chrome (⋮) → Install app / Tambah ke layar utama.");
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                document.getElementById('install-btn-container').style.display = 'none';
+            }
+            
+            deferredPrompt = null;
+        }
+
+        window.onload = async () => {
             if (!isMobileDevice()) {
                 document.getElementById('pc-warning').style.display = 'flex';
                 return;
             }
             
-            // Preload semua gambar
             await preloadImages();
             
-            // Cek orientasi
             checkOrientation();
             window.addEventListener('resize', checkOrientation);
             window.addEventListener('orientationchange', checkOrientation);
             
-            // Mulai sequence
-            startSequence();
-            
-            // Force fullscreen & landscape (PWA lebih optimal)
-            setTimeout(() => {
-                forceFullscreenAndLandscape();
-            }, 1000);
-            
-            // Register Service Worker untuk PWA
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.register('sw.js');
-                    console.log('%cPWA Service Worker terdaftar ✓', 'color: lime');
-                } catch (err) {
-                    console.log('Service Worker gagal:', err);
-                }
-            }
-            
-            // Install prompt (Chrome akan otomatis tampilkan banner install)
-            let deferredPrompt;
+            // Simpan event install prompt
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                console.log('%cPWA siap di-install. Chrome akan menampilkan banner install.', 'color: #0ff');
+                console.log('PWA install prompt siap');
             });
+            
+            // Attach tombol install
+            document.getElementById('install-btn').addEventListener('click', installPWA);
+            
+            startSequence();
+            
+            setTimeout(forceFullscreenAndLandscape, 1000);
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+            }
         };
     </script>
 </body>
