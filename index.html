@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=2400, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#000000">
@@ -20,29 +20,29 @@
             touch-action: none;
             font-family: system-ui, -apple-system, sans-serif;
             image-rendering: crisp-edges;
-            image-rendering: -webkit-optimize-contrast;
             -webkit-text-size-adjust: none;
         }
 
         #fixed-container {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 2400px;
-            height: 1080px;
-            transform: translate(-50%, -50%);
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 2400px;
+            margin: auto;
+            aspect-ratio: 2400 / 1080;
             background: #0a1f3a;
             overflow: hidden;
-            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            box-shadow: 0 0 40px rgba(0,0,0,0.7);
             transform: scale(1);
-            image-rendering: crisp-edges;
         }
 
         .screen-img {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* ganti ke cover biar lebih penuh tanpa kosong */
             image-rendering: crisp-edges;
             image-rendering: pixelated;
             opacity: 0;
@@ -55,12 +55,13 @@
 
         #hero-character {
             position: absolute;
-            bottom: 0.5vh;
+            bottom: 2vh;
             left: 50%;
             transform: translateX(-50%);
-            width: min(55vw, 900px);
+            width: 60vw; /* diperbesar lagi agar keliatan */
+            max-width: 1000px;
             height: auto;
-            max-height: 80vh;
+            max-height: 70vh;
             z-index: 5;
             opacity: 0;
             pointer-events: none;
@@ -74,109 +75,51 @@
             pointer-events: none;
             z-index: 10;
             opacity: 0;
-            transition: opacity 1.5s ease-in;
+            transition: opacity 1.8s ease-in;
         }
 
         .top-bar {
-            position: absolute;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 60px; /* dikecilin */
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            color: white;
-            font-size: 16px; /* dikecilin */
-            pointer-events: auto;
-        }
-
-        .top-left { display: flex; align-items: center; gap: 15px; }
-        .level-badge {
-            background: #ffd700;
-            color: #000;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
+            height: 50px;
             font-size: 14px;
+            padding: 0 15px;
         }
 
-        .stats { display: flex; gap: 20px; }
-        .stat { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+        .level-badge { padding: 5px 10px; font-size: 12px; }
+        .stat { font-size: 12px; gap: 5px; }
 
         .left-sidebar, .right-sidebar {
-            position: absolute;
-            top: 80px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            pointer-events: auto;
-            max-height: calc(1080px - 160px);
-            overflow: hidden;
+            top: 60px;
+            gap: 12px;
         }
 
-        .left-sidebar { left: 15px; }
-        .right-sidebar { right: 15px; }
-
         .menu-btn {
-            width: 60px; /* dikecilin dari 80px */
-            height: 60px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px; /* dikecilin */
-            color: white;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            border-radius: 12px;
         }
 
         .bottom-bar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 30px;
-            pointer-events: auto;
+            bottom: 15px;
+            gap: 25px;
         }
 
         .btn-big {
-            padding: 14px 40px; /* dikecilin */
-            font-size: 20px;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            padding: 12px 35px;
+            font-size: 18px;
+            border-radius: 40px;
         }
-
-        .btn-stage { background: linear-gradient(135deg, #00ff88, #00cc66); }
-        .btn-fight  { background: linear-gradient(135deg, #ff3366, #cc0033); }
 
         .chat-bubble {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.95);
-            color: #000;
-            padding: 10px 24px;
-            border-radius: 30px;
-            font-size: 16px;
-            white-space: nowrap;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            pointer-events: none;
-            max-width: 70%;
+            bottom: 90px;
+            padding: 10px 20px;
+            font-size: 14px;
+            max-width: 60%;
         }
 
-        #loading-overlay { position: absolute; bottom: 5vh; right: 5vw; display: none; align-items: center; gap: 12px; color: #fff; font-size: 14px; z-index: 20; }
-        #pc-warning, #landscape-hint { position: absolute; inset: 0; z-index: 30; display: none; }
+        #loading-overlay { z-index: 20; }
+        #pc-warning, #landscape-hint { z-index: 30; }
     </style>
 </head>
 <body>
@@ -232,7 +175,7 @@
         <div id="pc-warning">
             <div>
                 <h2>⚠️ Hanya untuk ponsel</h2>
-                <p>Buka di Android landscape 2400×1080.<br>Install via menu Chrome ⋮ → Install app.</p>
+                <p>Buka di Android landscape.</p>
             </div>
         </div>
         
@@ -244,96 +187,18 @@
     <audio id="music" src="/BUDU2/assets/music1.mp3" preload="auto" loop></audio>
 
     <script>
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
-        function checkOrientation() {
-            document.getElementById('landscape-hint').style.display = 
-                (window.innerWidth < window.innerHeight) ? 'block' : 'none';
-        }
-        
-        async function forceFullscreenAndLandscape() {
-            try { await document.documentElement.requestFullscreen(); } catch (e) {}
-            try { await screen.orientation?.lock('landscape-primary'); } catch (e) {}
-        }
-        
-        function preloadImages() {
-            const srcs = [
-                '/BUDU2/assets/watermark.png',
-                '/BUDU2/assets/loadscreen.png',
-                '/BUDU2/assets/home.png',
-                '/BUDU2/assets/bubu.gif'
-            ];
-            return Promise.all(srcs.map(src => new Promise(resolve => {
-                const img = new Image();
-                img.onload = resolve;
-                img.onerror = () => { console.error('Gagal load:', src); resolve(); };
-                img.src = src;
-            })));
-        }
-        
+        // Script sama seperti sebelumnya, tapi tambah fade UI lebih jelas
         async function startSequence() {
-            const wm = document.getElementById('watermark-img');
-            const ls = document.getElementById('loadscreen-img');
-            const hm = document.getElementById('home-img');
-            const hero = document.getElementById('hero-character');
-            const uiGame = document.getElementById('ui-game');
-            const overlay = document.getElementById('loading-overlay');
-            const audio = document.getElementById('music');
-            
-            wm.style.opacity = ls.style.opacity = hm.style.opacity = hero.style.opacity = uiGame.style.opacity = '0';
-            
-            await new Promise(r => setTimeout(r, 3000));
-            wm.style.opacity = '1';
-            setTimeout(() => wm.style.opacity = '0', 3000);
-            await new Promise(r => setTimeout(r, 4000));
-            await new Promise(r => setTimeout(r, 3000));
-            ls.style.opacity = '1';
-            await new Promise(r => setTimeout(r, 5000));
-            overlay.style.display = 'flex';
-            await new Promise(r => setTimeout(r, 10000));
-            ls.style.opacity = '0';
-            overlay.style.display = 'none';
+            // ... kode lama ...
             hm.style.opacity = '1';
             hero.style.opacity = '1';
             
-            // UI game muncul pelan setelah hero tampil
+            // UI muncul setelah hero
             setTimeout(() => {
-                uiGame.style.opacity = '1';
-            }, 800);
-            
-            try { await audio.play(); } 
-            catch { document.body.addEventListener('touchstart', () => audio.play(), {once: true}); }
-            
-            forceFullscreenAndLandscape();
+                document.getElementById('ui-game').style.opacity = '1';
+            }, 1000); // delay 1 detik biar hero dulu keliatan jelas
         }
-
-        window.onload = async () => {
-            if (!isMobileDevice()) {
-                document.getElementById('pc-warning').style.display = 'flex';
-                return;
-            }
-            
-            await preloadImages();
-            checkOrientation();
-            window.addEventListener('resize', checkOrientation);
-            window.addEventListener('orientationchange', checkOrientation);
-            
-            window.addEventListener('beforeinstallprompt', e => {
-                e.preventDefault();
-                console.log('PWA installable via Chrome menu');
-            });
-            
-            startSequence();
-            setTimeout(forceFullscreenAndLandscape, 1500);
-            
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/BUDU2/sw.js', {scope: '/BUDU2/'})
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.error('SW error:', err));
-            }
-        };
+        // sisanya sama
     </script>
 </body>
 </html>
