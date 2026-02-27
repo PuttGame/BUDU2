@@ -8,137 +8,21 @@
     <meta name="theme-color" content="#000000">
     <title>BUDU2</title>
     
-    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-            touch-action: none;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-        
-        .full-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 1;
-        }
-        
-        .screen-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-            pointer-events: none;
-        }
-        
-        #watermark-img { z-index: 2; }
-        #loadscreen-img { z-index: 3; }
-        #home-img { z-index: 4; }
-        
-        #loading-overlay {
-            position: fixed;
-            bottom: 5vh;
-            right: 5vw;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 400;
-            z-index: 10;
-            text-shadow: 0 0 8px rgba(0,0,0,0.8);
-        }
-        
-        .spinner {
-            width: 22px;
-            height: 22px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        #pc-warning {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            color: white;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            z-index: 9999;
-            font-size: 18px;
-        }
-        
-        #landscape-hint {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 16px;
-            display: none;
-            z-index: 100;
-            text-align: center;
-        }
-
-        /* Tombol Install */
-        #install-btn-container {
-            display: none;
-            position: fixed;
-            bottom: 8vh;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-        }
-        
-        #install-btn {
-            padding: 14px 32px;
-            font-size: 18px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ff3366, #ff6b6b);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            box-shadow: 0 8px 20px rgba(255,51,102,0.4);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        #install-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 4px 10px rgba(255,51,102,0.3);
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { width:100%; height:100%; overflow:hidden; background:#000; touch-action:none; font-family:system-ui, -apple-system, sans-serif; }
+        .full-screen { position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:1; }
+        .screen-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; opacity:0; transition:opacity 1s ease-in-out; pointer-events:none; }
+        #watermark-img { z-index:2; }
+        #loadscreen-img { z-index:3; }
+        #home-img { z-index:4; }
+        #loading-overlay { position:fixed; bottom:5vh; right:5vw; display:none; align-items:center; gap:12px; color:#fff; font-size:14px; font-weight:400; z-index:10; text-shadow:0 0 8px rgba(0,0,0,0.8); }
+        .spinner { width:22px; height:22px; border:3px solid rgba(255,255,255,0.3); border-top:3px solid #fff; border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        #pc-warning { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); color:white; display:none; align-items:center; justify-content:center; text-align:center; padding:20px; z-index:9999; font-size:18px; }
+        #landscape-hint { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); color:white; padding:15px 25px; border-radius:10px; font-size:16px; display:none; z-index:100; text-align:center; }
     </style>
 </head>
 <body>
@@ -156,8 +40,7 @@
     <div id="pc-warning">
         <div>
             <h2>⚠️ Website ini hanya untuk ponsel</h2>
-            <p>Mohon buka di ponsel Android/iOS dengan resolusi landscape 2400×1080.<br>
-            Install sebagai aplikasi PWA untuk pengalaman terbaik.</p>
+            <p>Mohon buka di ponsel Android/iOS landscape 2400×1080.<br>Install via menu Chrome untuk fullscreen optimal.</p>
         </div>
     </div>
     
@@ -165,16 +48,9 @@
         Putar ponsel Anda ke mode landscape
     </div>
     
-    <!-- Tombol Install -->
-    <div id="install-btn-container">
-        <button id="install-btn">Install ke Layar Utama</button>
-    </div>
-    
     <audio id="music" src="assets/music1.mp3" preload="auto" loop></audio>
 
     <script>
-        let deferredPrompt = null;
-
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
@@ -199,13 +75,11 @@
         
         function preloadImages() {
             const images = ['assets/watermark.png', 'assets/loadscreen.png', 'assets/home.png'];
-            return Promise.all(images.map(src => {
-                return new Promise(resolve => {
-                    const img = new Image();
-                    img.onload = resolve;
-                    img.src = src;
-                });
-            }));
+            return Promise.all(images.map(src => new Promise(resolve => {
+                const img = new Image();
+                img.onload = resolve;
+                img.src = src;
+            })));
         }
         
         async function startSequence() {
@@ -220,23 +94,17 @@
             home.style.opacity = '0';
             
             await new Promise(r => setTimeout(r, 3000));
-            
             watermark.style.opacity = '1';
             setTimeout(() => { watermark.style.opacity = '0'; }, 3000);
             await new Promise(r => setTimeout(r, 4000));
-            
             await new Promise(r => setTimeout(r, 3000));
-            
             loadscreen.style.opacity = '1';
             await new Promise(r => setTimeout(r, 5000));
-            
             loadingOverlay.style.display = 'flex';
             await new Promise(r => setTimeout(r, 10000));
-            
             loadscreen.style.opacity = '0';
             loadingOverlay.style.display = 'none';
             await new Promise(r => setTimeout(r, 800));
-            
             home.style.opacity = '1';
             
             try {
@@ -245,27 +113,7 @@
                 document.body.addEventListener('touchstart', () => audio.play().catch(() => {}), { once: true });
             }
             
-            // Tampilkan tombol install setelah home muncul
-            await new Promise(r => setTimeout(r, 1500));
-            document.getElementById('install-btn-container').style.display = 'block';
-            
             forceFullscreenAndLandscape();
-        }
-        
-        async function installPWA() {
-            if (!deferredPrompt) {
-                alert("Install prompt belum siap. Coba dari menu Chrome (⋮) → Install app / Tambah ke layar utama.");
-                return;
-            }
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                document.getElementById('install-btn-container').style.display = 'none';
-            }
-            
-            deferredPrompt = null;
         }
 
         window.onload = async () => {
@@ -280,15 +128,12 @@
             window.addEventListener('resize', checkOrientation);
             window.addEventListener('orientationchange', checkOrientation);
             
-            // Simpan event install prompt
+            // Tangkap beforeinstallprompt tapi hanya prevent default (tidak simpan atau tampilkan tombol custom)
             window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                console.log('PWA install prompt siap');
+                e.preventDefault();  // Cegah mini-infobar otomatis muncul (biar tidak ganggu UI-mu)
+                console.log('PWA installable via Chrome menu (⋮ → Install app)');
+                // Jangan simpan deferredPrompt atau tampilkan tombol apa pun
             });
-            
-            // Attach tombol install
-            document.getElementById('install-btn').addEventListener('click', installPWA);
             
             startSequence();
             
