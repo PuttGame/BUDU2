@@ -1,7 +1,7 @@
 {
   "name": "BUDU2",
   "short_name": "BUDU2",
-  "description": "BUDU2 - Fullscreen Landscape Experience",
+  "description": "BUDU2 Experience",
   "start_url": "/BUDU2/",
   "scope": "/BUDU2/",
   "display": "fullscreen",
