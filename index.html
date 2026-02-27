@@ -12,59 +12,142 @@
     
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { width:100%; height:100%; overflow:hidden; background:#000; touch-action:none; font-family:system-ui, -apple-system, sans-serif; }
-        .full-screen { position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:1; }
-        .screen-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; opacity:0; pointer-events:none; }
-        #watermark-img { z-index:2; transition: opacity 1s ease-in-out; }
-        #loadscreen-img { z-index:3; }
-        #home-img { z-index:4; }
-        #loading-overlay { position:fixed; bottom:5vh; right:5vw; display:none; align-items:center; gap:12px; color:#fff; font-size:14px; font-weight:400; z-index:10; text-shadow:0 0 8px rgba(0,0,0,0.8); }
-        .spinner { width:22px; height:22px; border:3px solid rgba(255,255,255,0.3); border-top:3px solid #fff; border-radius:50%; animation:spin 1s linear infinite; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-        #pc-warning { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); color:white; display:none; align-items:center; justify-content:center; text-align:center; padding:20px; z-index:9999; font-size:18px; }
-        #landscape-hint { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); color:white; padding:15px 25px; border-radius:10px; font-size:16px; display:none; z-index:100; text-align:center; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            touch-action: none;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
 
-        /* GIF bubu di tengah bawah - diperbesar & diturunin */
-        #bubu-gif {
+        /* Container utama dipaksa ukuran 2400×1080, centered */
+        #fixed-container {
             position: fixed;
-            bottom: 2vh;               /* diturunin lagi, hampir nempel bawah */
+            top: 50%;
+            left: 50%;
+            width: 2400px;
+            height: 1080px;
+            transform: translate(-50%, -50%);
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        /* Gambar full-screen di dalam container */
+        .screen-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #watermark-img { z-index: 2; transition: opacity 1s ease-in-out; }
+        #loadscreen-img { z-index: 3; }
+        #home-img { z-index: 4; }
+
+        /* GIF bubu di tengah bawah (relatif container) */
+        #bubu-gif {
+            position: absolute;
+            bottom: 2vh;
             left: 50%;
             transform: translateX(-50%);
-            width: 45vw;               /* diperbesar jadi 45% lebar layar */
-            max-width: 600px;          /* batas max biar nggak kegedean di layar besar */
+            width: 45vw;
+            max-width: 600px;
             height: auto;
             z-index: 5;
             opacity: 0;
             pointer-events: none;
         }
+
+        /* Loading overlay di kanan bawah container */
+        #loading-overlay {
+            position: absolute;
+            bottom: 5vh;
+            right: 5vw;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 400;
+            z-index: 10;
+            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+        }
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Warning PC full container */
+        #pc-warning {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 9999;
+            font-size: 18px;
+        }
+
+        /* Hint landscape di tengah container */
+        #landscape-hint {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+            z-index: 100;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="full-screen" id="app">
-        <img id="watermark-img" class="screen-img" src="/BUDU2/assets/watermark.png" alt="Watermark">
-        <img id="loadscreen-img" class="screen-img" src="/BUDU2/assets/loadscreen.png" alt="Loadscreen">
-        <img id="home-img" class="screen-img" src="/BUDU2/assets/home.png" alt="Home">
-    </div>
-    
-    <!-- GIF bubu -->
-    <img id="bubu-gif" src="/BUDU2/assets/bubu.gif" alt="Bubu">
+    <!-- Container ukuran tetap 2400×1080 -->
+    <div id="fixed-container">
+        <div id="app">
+            <img id="watermark-img" class="screen-img" src="/BUDU2/assets/watermark.png" alt="Watermark">
+            <img id="loadscreen-img" class="screen-img" src="/BUDU2/assets/loadscreen.png" alt="Loadscreen">
+            <img id="home-img" class="screen-img" src="/BUDU2/assets/home.png" alt="Home">
+        </div>
+        
+        <img id="bubu-gif" src="/BUDU2/assets/bubu.gif" alt="Bubu">
 
-    <div id="loading-overlay">
-        <div class="spinner"></div>
-        <span>loading</span>
-    </div>
-    
-    <div id="pc-warning">
-        <div>
-            <h2>⚠️ Hanya untuk ponsel</h2>
-            <p>Buka di Android landscape 2400×1080.<br>Install via menu Chrome ⋮ → Install app untuk fullscreen optimal.</p>
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <span>loading</span>
+        </div>
+        
+        <div id="pc-warning">
+            <div>
+                <h2>⚠️ Hanya untuk ponsel</h2>
+                <p>Buka di Android landscape 2400×1080.<br>Install via menu Chrome ⋮ → Install app untuk pengalaman terbaik.</p>
+            </div>
+        </div>
+        
+        <div id="landscape-hint">
+            Putar ponsel ke mode landscape
         </div>
     </div>
-    
-    <div id="landscape-hint">
-        Putar ponsel ke mode landscape
-    </div>
-    
+
     <audio id="music" src="/BUDU2/assets/music1.mp3" preload="auto" loop></audio>
 
     <script>
@@ -93,7 +176,7 @@
                 '/BUDU2/assets/home.png',
                 '/BUDU2/assets/bubu.gif'
             ];
-            return Promise.all(srcs.map(src => new Promise((resolve) => {
+            return Promise.all(srcs.map(src => new Promise(resolve => {
                 const img = new Image();
                 img.onload = resolve;
                 img.onerror = () => { console.error('Gagal load:', src); resolve(); };
@@ -123,8 +206,6 @@
             ls.style.opacity = '0';
             overlay.style.display = 'none';
             hm.style.opacity = '1';
-            
-            // Tampilkan bubu.gif setelah home
             bubu.style.opacity = '1';
             
             try {
