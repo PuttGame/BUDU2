@@ -1,7 +1,7 @@
 {
   "name": "BUDU2",
   "short_name": "BUDU2",
-  "description": "BUDU2 - Aplikasi PWA Fullscreen Landscape",
+  "description": "BUDU2 - Fullscreen Landscape Experience",
   "start_url": "/BUDU2/",
   "scope": "/BUDU2/",
   "display": "fullscreen",
@@ -10,14 +10,16 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "assets/icon-192.png",
+      "src": "/BUDU2/assets/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "assets/icon-512.png",
+      "src": "/BUDU2/assets/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
