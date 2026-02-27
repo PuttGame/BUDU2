@@ -8,7 +8,8 @@
     <meta name="theme-color" content="#000000">
     <title>BUDU2</title>
     
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/BUDU2/manifest.json">
     
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -27,9 +28,9 @@
 </head>
 <body>
     <div class="full-screen" id="app">
-        <img id="watermark-img" class="screen-img" src="assets/watermark.png" alt="Watermark">
-        <img id="loadscreen-img" class="screen-img" src="assets/loadscreen.png" alt="Loadscreen">
-        <img id="home-img" class="screen-img" src="assets/home.png" alt="Home">
+        <img id="watermark-img" class="screen-img" src="/BUDU2/assets/watermark.png" alt="Watermark">
+        <img id="loadscreen-img" class="screen-img" src="/BUDU2/assets/loadscreen.png" alt="Loadscreen">
+        <img id="home-img" class="screen-img" src="/BUDU2/assets/home.png" alt="Home">
     </div>
     
     <div id="loading-overlay">
@@ -40,7 +41,7 @@
     <div id="pc-warning">
         <div>
             <h2>⚠️ Website ini hanya untuk ponsel</h2>
-            <p>Mohon buka di ponsel Android/iOS landscape 2400×1080.<br>Install via menu Chrome untuk fullscreen optimal.</p>
+            <p>Buka di ponsel Android landscape 2400×1080.<br>Install via menu Chrome (⋮) → Install app untuk pengalaman terbaik.</p>
         </div>
     </div>
     
@@ -48,7 +49,7 @@
         Putar ponsel Anda ke mode landscape
     </div>
     
-    <audio id="music" src="assets/music1.mp3" preload="auto" loop></audio>
+    <audio id="music" src="/BUDU2/assets/music1.mp3" preload="auto" loop></audio>
 
     <script>
         function isMobileDevice() {
@@ -74,10 +75,15 @@
         }
         
         function preloadImages() {
-            const images = ['assets/watermark.png', 'assets/loadscreen.png', 'assets/home.png'];
+            const images = [
+                '/BUDU2/assets/watermark.png',
+                '/BUDU2/assets/loadscreen.png',
+                '/BUDU2/assets/home.png'
+            ];
             return Promise.all(images.map(src => new Promise(resolve => {
                 const img = new Image();
                 img.onload = resolve;
+                img.onerror = () => console.error('Gagal load gambar:', src);
                 img.src = src;
             })));
         }
@@ -109,7 +115,9 @@
             
             try {
                 await audio.play();
+                console.log('Musik diputar');
             } catch (err) {
+                console.log('Autoplay diblokir, tunggu touch');
                 document.body.addEventListener('touchstart', () => audio.play().catch(() => {}), { once: true });
             }
             
@@ -128,19 +136,27 @@
             window.addEventListener('resize', checkOrientation);
             window.addEventListener('orientationchange', checkOrientation);
             
-            // Tangkap beforeinstallprompt tapi hanya prevent default (tidak simpan atau tampilkan tombol custom)
+            // Cegah mini-infobar otomatis agar tidak ganggu UI
             window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();  // Cegah mini-infobar otomatis muncul (biar tidak ganggu UI-mu)
-                console.log('PWA installable via Chrome menu (⋮ → Install app)');
-                // Jangan simpan deferredPrompt atau tampilkan tombol apa pun
+                e.preventDefault();
+                console.log('PWA siap installable – cek menu Chrome ⋮ untuk "Install app"');
             });
             
             startSequence();
             
             setTimeout(forceFullscreenAndLandscape, 1000);
             
+            // Register Service Worker dengan scope eksplisit
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+                navigator.serviceWorker.register('/BUDU2/sw.js', { scope: '/BUDU2/' })
+                    .then(reg => {
+                        console.log('Service Worker terdaftar sukses, scope:', reg.scope);
+                    })
+                    .catch(err => {
+                        console.error('Gagal register SW:', err);
+                    });
+            } else {
+                console.warn('Service Worker tidak didukung di browser ini');
             }
         };
     </script>
