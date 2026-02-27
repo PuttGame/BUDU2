@@ -24,18 +24,18 @@
         #pc-warning { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); color:white; display:none; align-items:center; justify-content:center; text-align:center; padding:20px; z-index:9999; font-size:18px; }
         #landscape-hint { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); color:white; padding:15px 25px; border-radius:10px; font-size:16px; display:none; z-index:100; text-align:center; }
 
-        /* GIF bubu di tengah bawah */
+        /* GIF bubu di tengah bawah - diperbesar & diturunin */
         #bubu-gif {
             position: fixed;
-            bottom: 5vh;               /* paling bawah, dengan margin */
+            bottom: 2vh;               /* diturunin lagi, hampir nempel bawah */
             left: 50%;
             transform: translateX(-50%);
-            width: 30vw;               /* responsif, max \~30% lebar layar */
-            max-width: 400px;          /* batas max biar nggak terlalu besar di layar besar */
+            width: 45vw;               /* diperbesar jadi 45% lebar layar */
+            max-width: 600px;          /* batas max biar nggak kegedean di layar besar */
             height: auto;
-            z-index: 5;                /* di atas home.png tapi di bawah loading/PC warning */
+            z-index: 5;
             opacity: 0;
-            pointer-events: none;      /* biar nggak ganggu tap */
+            pointer-events: none;
         }
     </style>
 </head>
@@ -91,7 +91,7 @@
                 '/BUDU2/assets/watermark.png',
                 '/BUDU2/assets/loadscreen.png',
                 '/BUDU2/assets/home.png',
-                '/BUDU2/assets/bubu.gif'  // preload GIF juga
+                '/BUDU2/assets/bubu.gif'
             ];
             return Promise.all(srcs.map(src => new Promise((resolve) => {
                 const img = new Image();
@@ -124,7 +124,7 @@
             overlay.style.display = 'none';
             hm.style.opacity = '1';
             
-            // Tampilkan bubu.gif setelah home muncul (langsung tanpa fade)
+            // Tampilkan bubu.gif setelah home
             bubu.style.opacity = '1';
             
             try {
